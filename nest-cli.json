@@ -1,8 +1,59 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src",
+  "sourceRoot": "apps/petcast-service/src",
   "compilerOptions": {
-    "deleteOutDir": true
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "apps/petcast-service/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/petcast-service",
+  "projects": {
+    "petcast-service": {
+      "type": "application",
+      "root": "apps/petcast-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/petcast-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/petcast-service/tsconfig.app.json"
+      }
+    },
+    "service-appointment": {
+      "type": "application",
+      "root": "apps/service-appointment",
+      "entryFile": "main",
+      "sourceRoot": "apps/service-appointment/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/service-appointment/tsconfig.app.json"
+      }
+    },
+    "service-pet": {
+      "type": "application",
+      "root": "apps/service-pet",
+      "entryFile": "main",
+      "sourceRoot": "apps/service-pet/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/service-pet/tsconfig.app.json"
+      }
+    },
+    "service-statistics": {
+      "type": "application",
+      "root": "apps/service-statistics",
+      "entryFile": "main",
+      "sourceRoot": "apps/service-statistics/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/service-statistics/tsconfig.app.json"
+      }
+    },
+    "service-user": {
+      "type": "application",
+      "root": "apps/service-user",
+      "entryFile": "main",
+      "sourceRoot": "apps/service-user/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/service-user/tsconfig.app.json"
+      }
+    }
   }
 }
