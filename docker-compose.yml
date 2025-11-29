@@ -1,0 +1,113 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: petcast-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_DATABASE:-petcast_db}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./seed-data.sql:/docker-entrypoint-initdb.d/seed-data.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  service-user:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: petcast-service-user
+    restart: unless-stopped
+    command: ["node", "dist/apps/service-user/main"]
+    ports:
+      - "${SERVICE_USER_PORT:-4201}:${SERVICE_USER_PORT:-4201}"
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USERNAME=${DB_USERNAME:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-root}
+      - DB_DATABASE=${DB_DATABASE:-petcast_db}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key}
+      - JWT_EXPIRATION=${JWT_EXPIRATION:-1h}
+      - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION:-7d}
+      - SERVICE_USER_PORT=${SERVICE_USER_PORT:-4201}
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  service-pet:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: petcast-service-pet
+    restart: unless-stopped
+    command: ["node", "dist/apps/service-pet/main"]
+    ports:
+      - "${SERVICE_PET_PORT:-4202}:${SERVICE_PET_PORT:-4202}"
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USERNAME=${DB_USERNAME:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-root}
+      - DB_DATABASE=${DB_DATABASE:-petcast_db}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key}
+      - JWT_EXPIRATION=${JWT_EXPIRATION:-1h}
+      - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION:-7d}
+      - SERVICE_PET_PORT=${SERVICE_PET_PORT:-4202}
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  service-appointment:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: petcast-service-appointment
+    restart: unless-stopped
+    command: ["node", "dist/apps/service-appointment/main"]
+    ports:
+      - "${SERVICE_APPOINTMENT_PORT:-4203}:${SERVICE_APPOINTMENT_PORT:-4203}"
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USERNAME=${DB_USERNAME:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-root}
+      - DB_DATABASE=${DB_DATABASE:-petcast_db}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key}
+      - JWT_EXPIRATION=${JWT_EXPIRATION:-1h}
+      - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION:-7d}
+      - SERVICE_APPOINTMENT_PORT=${SERVICE_APPOINTMENT_PORT:-4203}
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  service-statistics:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: petcast-service-statistics
+    restart: unless-stopped
+    command: ["node", "dist/apps/service-statistics/main"]
+    ports:
+      - "${SERVICE_STATISTICS_PORT:-4204}:${SERVICE_STATISTICS_PORT:-4204}"
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USERNAME=${DB_USERNAME:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-root}
+      - DB_DATABASE=${DB_DATABASE:-petcast_db}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key}
+      - JWT_EXPIRATION=${JWT_EXPIRATION:-1h}
+      - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION:-7d}
+      - SERVICE_STATISTICS_PORT=${SERVICE_STATISTICS_PORT:-4204}
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
