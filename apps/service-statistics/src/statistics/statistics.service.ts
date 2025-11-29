@@ -118,4 +118,38 @@ export class StatisticsService {
       order: { fechaGeneracion: 'DESC' },
     });
   }
+
+  /**
+   * Obtiene un resumen para el dashboard del admin
+   * Retorna las estadísticas más recientes o valores por defecto
+   */
+  async getDashboardSummary(): Promise<{
+    totalMascotas: number;
+    totalCitas: number;
+    totalClientes: number;
+    citasHoy: number;
+  }> {
+    // Buscar la estadística más reciente
+    const latest = await this.estadisticaRepository.findOne({
+      order: { fechaGeneracion: 'DESC' },
+    });
+
+    // Si existe, retornar los valores
+    if (latest) {
+      return {
+        totalMascotas: latest.numeroMascotas,
+        totalCitas: latest.numeroCitas,
+        totalClientes: latest.numeroClientes,
+        citasHoy: 0, // Este valor se actualizaría desde el servicio de citas
+      };
+    }
+
+    // Valores por defecto si no hay estadísticas
+    return {
+      totalMascotas: 0,
+      totalCitas: 0,
+      totalClientes: 0,
+      citasHoy: 0,
+    };
+  }
 }

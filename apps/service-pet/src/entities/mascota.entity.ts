@@ -45,6 +45,10 @@ export class Mascota {
   @Column({ length: 255, nullable: true, unique: true })
   codigoQR: string;
 
+  // URL de la imagen de la mascota (opcional)
+  @Column({ length: 500, nullable: true })
+  imagen: string;
+
   @CreateDateColumn()
   fechaRegistro: Date;
 

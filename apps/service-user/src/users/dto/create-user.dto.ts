@@ -8,6 +8,11 @@ import {
 } from 'class-validator';
 import { EstadoUsuario, RolUsuario } from '@app/shared';
 
+/**
+ * DTO para crear usuario
+ * Incluye campos opcionales de todos los tipos de usuario
+ * para permitir creación desde un endpoint genérico
+ */
 export class CreateUserDto {
   @IsNotEmpty()
   @IsString()
@@ -31,15 +36,13 @@ export class CreateUserDto {
   @IsOptional()
   @IsEnum(EstadoUsuario)
   estado?: EstadoUsuario;
-}
 
-export class CreateAdministradorDto extends CreateUserDto {
+  // Campos de Administrador
   @IsOptional()
   @IsString()
   permisos?: string;
-}
 
-export class CreateVeterinarioDto extends CreateUserDto {
+  // Campos de Veterinario
   @IsOptional()
   @IsString()
   cedula?: string;
@@ -47,9 +50,8 @@ export class CreateVeterinarioDto extends CreateUserDto {
   @IsOptional()
   @IsString()
   especialidad?: string;
-}
 
-export class CreateDuenoDto extends CreateUserDto {
+  // Campos de Dueño
   @IsOptional()
   @IsString()
   telefono?: string;
@@ -58,3 +60,9 @@ export class CreateDuenoDto extends CreateUserDto {
   @IsString()
   direccion?: string;
 }
+
+export class CreateAdministradorDto extends CreateUserDto {}
+
+export class CreateVeterinarioDto extends CreateUserDto {}
+
+export class CreateDuenoDto extends CreateUserDto {}

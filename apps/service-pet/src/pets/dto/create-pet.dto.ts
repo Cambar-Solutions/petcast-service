@@ -40,7 +40,12 @@ export class CreatePetDto {
   @IsEnum(Sexo)
   sexo: Sexo;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
-  duenoId: number;
+  duenoId?: number;
+
+  // URL de la imagen de la mascota (opcional)
+  @IsOptional()
+  @IsString()
+  imagen?: string;
 }
