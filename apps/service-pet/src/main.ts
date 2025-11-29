@@ -13,7 +13,7 @@ async function bootstrap() {
 
   app.enableCors();
 
-  const port = process.env.SERVICE_PET_PORT ?? 3002;
+  const port = process.env.SERVICE_PET_PORT ?? 4202;
   await app.listen(port);
   console.log(`Service Pet running on port ${port}`);
 }

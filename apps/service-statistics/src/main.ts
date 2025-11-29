@@ -13,7 +13,7 @@ async function bootstrap() {
 
   app.enableCors();
 
-  const port = process.env.SERVICE_STATISTICS_PORT ?? 3004;
+  const port = process.env.SERVICE_STATISTICS_PORT ?? 4204;
   await app.listen(port);
   console.log(`Service Statistics running on port ${port}`);
 }

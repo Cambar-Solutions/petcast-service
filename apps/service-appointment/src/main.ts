@@ -13,7 +13,7 @@ async function bootstrap() {
 
   app.enableCors();
 
-  const port = process.env.SERVICE_APPOINTMENT_PORT ?? 3003;
+  const port = process.env.SERVICE_APPOINTMENT_PORT ?? 4203;
   await app.listen(port);
   console.log(`Service Appointment running on port ${port}`);
 }
