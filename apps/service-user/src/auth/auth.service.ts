@@ -16,7 +16,6 @@ import {
 } from './dto/create-auth.dto';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { EstadoUsuario } from '@app/shared';
-import axios from 'axios';
 
 @Injectable()
 export class AuthService {
@@ -153,22 +152,12 @@ export class AuthService {
       codigoRecuperacionExpira: expiracion,
     } as any);
 
-    // Enviar código por WhatsApp (llamada al service-pet)
-    try {
-      const petServiceUrl = this.configService.get<string>('PET_SERVICE_URL') || 'http://localhost:3001';
-      await axios.post(`${petServiceUrl}/whatsapp/send-recovery-code`, {
-        phone: dto.telefono,
-        nombreUsuario: user.nombre,
-        codigo: codigo,
-      });
-    } catch (error) {
-      console.error('Error enviando WhatsApp:', error.message);
-      // No lanzamos error para no revelar si el número existe
-    }
-
+    // Retornar código y nombre para que el frontend envíe el WhatsApp
     return {
       success: true,
-      message: 'Si el número está registrado, recibirás un código por WhatsApp',
+      message: 'Código generado correctamente',
+      codigo: codigo,
+      nombreUsuario: user.nombre,
     };
   }
 
