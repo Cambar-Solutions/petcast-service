@@ -12,10 +12,9 @@ async function bootstrap() {
   }));
 
   app.enableCors();
-  app.setGlobalPrefix('api');
 
-  const port = process.env.SERVICE_STATISTICS_PORT ?? 3004;
-  await app.listen(port);
+  const port = process.env.SERVICE_STATISTICS_PORT ?? 4204;
+  await app.listen(port, '0.0.0.0');
   console.log(`Service Statistics running on port ${port}`);
 }
 bootstrap();

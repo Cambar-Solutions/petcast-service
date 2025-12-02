@@ -1,0 +1,80 @@
+services:
+  service-user:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: petcast-service-user
+    restart: unless-stopped
+    command: ["node", "dist/apps/service-user/main"]
+    ports:
+      - "${SERVICE_USER_PORT:-4201}:${SERVICE_USER_PORT:-4201}"
+    environment:
+      - DB_HOST=${DB_HOST:-host.docker.internal}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_USERNAME=${DB_USERNAME:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-root}
+      - DB_DATABASE=${DB_DATABASE:-petcast_db}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key}
+      - JWT_EXPIRATION=${JWT_EXPIRATION:-1h}
+      - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION:-7d}
+      - SERVICE_USER_PORT=${SERVICE_USER_PORT:-4201}
+
+  service-pet:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: petcast-service-pet
+    restart: unless-stopped
+    command: ["node", "dist/apps/service-pet/main"]
+    ports:
+      - "${SERVICE_PET_PORT:-4202}:${SERVICE_PET_PORT:-4202}"
+    environment:
+      - DB_HOST=${DB_HOST:-host.docker.internal}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_USERNAME=${DB_USERNAME:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-root}
+      - DB_DATABASE=${DB_DATABASE:-petcast_db}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key}
+      - JWT_EXPIRATION=${JWT_EXPIRATION:-1h}
+      - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION:-7d}
+      - SERVICE_PET_PORT=${SERVICE_PET_PORT:-4202}
+
+  service-appointment:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: petcast-service-appointment
+    restart: unless-stopped
+    command: ["node", "dist/apps/service-appointment/main"]
+    ports:
+      - "${SERVICE_APPOINTMENT_PORT:-4203}:${SERVICE_APPOINTMENT_PORT:-4203}"
+    environment:
+      - DB_HOST=${DB_HOST:-host.docker.internal}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_USERNAME=${DB_USERNAME:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-root}
+      - DB_DATABASE=${DB_DATABASE:-petcast_db}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key}
+      - JWT_EXPIRATION=${JWT_EXPIRATION:-1h}
+      - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION:-7d}
+      - SERVICE_APPOINTMENT_PORT=${SERVICE_APPOINTMENT_PORT:-4203}
+
+  service-statistics:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: petcast-service-statistics
+    restart: unless-stopped
+    command: ["node", "dist/apps/service-statistics/main"]
+    ports:
+      - "${SERVICE_STATISTICS_PORT:-4204}:${SERVICE_STATISTICS_PORT:-4204}"
+    environment:
+      - DB_HOST=${DB_HOST:-host.docker.internal}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_USERNAME=${DB_USERNAME:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-root}
+      - DB_DATABASE=${DB_DATABASE:-petcast_db}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key}
+      - JWT_EXPIRATION=${JWT_EXPIRATION:-1h}
+      - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION:-7d}
+      - SERVICE_STATISTICS_PORT=${SERVICE_STATISTICS_PORT:-4204}
