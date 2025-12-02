@@ -7,7 +7,7 @@ import {
   OneToMany,
   JoinColumn,
 } from 'typeorm';
-import { Sexo } from '@app/shared';
+import { Sexo, EstadoMascota } from '@app/shared';
 import { FichaMedica } from './ficha-medica.entity';
 
 @Entity('mascotas')
@@ -41,6 +41,17 @@ export class Mascota {
     enum: Sexo,
   })
   sexo: Sexo;
+
+  @Column({
+    type: 'enum',
+    enum: EstadoMascota,
+    default: EstadoMascota.ACTIVO,
+  })
+  estado: EstadoMascota;
+
+  // Fecha de la última visita al veterinario (para validar estado activo)
+  @Column({ type: 'datetime', nullable: true })
+  ultimaVisita: Date;
 
   @Column({ length: 255, nullable: true, unique: true })
   codigoQR: string;

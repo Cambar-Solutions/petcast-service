@@ -4,8 +4,9 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsDateString,
 } from 'class-validator';
-import { Sexo } from '@app/shared';
+import { Sexo, EstadoMascota } from '@app/shared';
 
 export class CreatePetDto {
   @IsNotEmpty()
@@ -39,6 +40,14 @@ export class CreatePetDto {
   @IsNotEmpty()
   @IsEnum(Sexo)
   sexo: Sexo;
+
+  @IsOptional()
+  @IsEnum(EstadoMascota)
+  estado?: EstadoMascota;
+
+  @IsOptional()
+  @IsDateString()
+  ultimaVisita?: string;
 
   @IsOptional()
   @IsNumber()

@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { PetsService } from './pets.service';
 import { CreatePetDto } from './dto/create-pet.dto';
 import { UpdatePetDto } from './dto/update-pet.dto';
+import { EstadoMascota } from '@app/shared';
 
 /**
  * Controlador de Mascotas
@@ -30,7 +31,7 @@ export class PetsController {
   }
 
   /**
-   * Obtener mascotas de un dueño específico
+   * Obtener mascotas de un dueno especifico
    * GET /api/pets/owner/:duenoId
    */
   @Get('owner/:duenoId')
@@ -39,7 +40,7 @@ export class PetsController {
   }
 
   /**
-   * Buscar mascota por código QR
+   * Buscar mascota por codigo QR
    * GET /api/pets/qr/:codigoQR
    */
   @Get('qr/:codigoQR')
@@ -63,6 +64,27 @@ export class PetsController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updatePetDto: UpdatePetDto) {
     return this.petsService.update(+id, updatePetDto);
+  }
+
+  /**
+   * Actualizar el estado de una mascota manualmente
+   * PATCH /api/pets/:id/status
+   */
+  @Patch(':id/status')
+  updateStatus(
+    @Param('id') id: string,
+    @Body('estado') estado: EstadoMascota,
+  ) {
+    return this.petsService.updateStatus(+id, estado);
+  }
+
+  /**
+   * Registrar visita al veterinario (reactiva la mascota)
+   * POST /api/pets/:id/visita
+   */
+  @Post(':id/visita')
+  registrarVisita(@Param('id') id: string) {
+    return this.petsService.registrarVisita(+id);
   }
 
   /**
