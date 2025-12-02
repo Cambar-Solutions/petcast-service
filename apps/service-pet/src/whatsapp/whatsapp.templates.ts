@@ -127,4 +127,20 @@ export const whatsappTemplates = {
   ) => {
     return `Hola ${nombreDueno}!\n\n${mensaje}\n\n*PetCast Veterinaria* 🐾`;
   },
+
+  // Código de recuperación de contraseña
+  passwordRecoveryCode: (
+    nombreUsuario: string,
+    codigo: string,
+  ) => {
+    let message = `Hola ${nombreUsuario}! 🔐\n\n`;
+    message += `Has solicitado recuperar tu contraseña en *PetCast*.\n\n`;
+    message += `Tu código de verificación es:\n\n`;
+    message += `*${codigo}*\n\n`;
+    message += `⏰ Este código expira en *10 minutos*.\n\n`;
+    message += `Si no solicitaste este código, ignora este mensaje.\n\n`;
+    message += `*PetCast Veterinaria* 🐾`;
+
+    return message;
+  },
 };

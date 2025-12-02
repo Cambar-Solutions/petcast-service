@@ -8,7 +8,14 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto, RecuperarContrasenaDto, CambiarContrasenaDto } from './dto/create-auth.dto';
+import {
+  LoginDto,
+  RecuperarContrasenaDto,
+  CambiarContrasenaDto,
+  SolicitarCodigoWhatsAppDto,
+  VerificarCodigoWhatsAppDto,
+  ResetContrasenaWhatsAppDto,
+} from './dto/create-auth.dto';
 import { RefreshTokenDto } from './dto/update-auth.dto';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -50,6 +57,27 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   cambiarContrasena(@Body() dto: CambiarContrasenaDto) {
     return this.authService.cambiarContrasena(dto);
+  }
+
+  @Public()
+  @Post('solicitar-codigo-whatsapp')
+  @HttpCode(HttpStatus.OK)
+  solicitarCodigoWhatsApp(@Body() dto: SolicitarCodigoWhatsAppDto) {
+    return this.authService.solicitarCodigoWhatsApp(dto);
+  }
+
+  @Public()
+  @Post('verificar-codigo-whatsapp')
+  @HttpCode(HttpStatus.OK)
+  verificarCodigoWhatsApp(@Body() dto: VerificarCodigoWhatsAppDto) {
+    return this.authService.verificarCodigoWhatsApp(dto);
+  }
+
+  @Public()
+  @Post('reset-contrasena-whatsapp')
+  @HttpCode(HttpStatus.OK)
+  resetContrasenaWhatsApp(@Body() dto: ResetContrasenaWhatsAppDto) {
+    return this.authService.resetContrasenaWhatsApp(dto);
   }
 
   @UseGuards(JwtAuthGuard)

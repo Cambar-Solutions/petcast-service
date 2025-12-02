@@ -6,9 +6,17 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
-import { LoginDto, RecuperarContrasenaDto, CambiarContrasenaDto } from './dto/create-auth.dto';
+import {
+  LoginDto,
+  RecuperarContrasenaDto,
+  CambiarContrasenaDto,
+  SolicitarCodigoWhatsAppDto,
+  VerificarCodigoWhatsAppDto,
+  ResetContrasenaWhatsAppDto,
+} from './dto/create-auth.dto';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { EstadoUsuario } from '@app/shared';
+import axios from 'axios';
 
 @Injectable()
 export class AuthService {
@@ -115,6 +123,106 @@ export class AuthService {
     } catch {
       throw new BadRequestException('Token inválido o expirado');
     }
+  }
+
+  // Generar código de 6 dígitos
+  private generateRecoveryCode(): string {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  }
+
+  // Solicitar código de recuperación por WhatsApp
+  async solicitarCodigoWhatsApp(dto: SolicitarCodigoWhatsAppDto) {
+    const user = await this.usersService.findByPhone(dto.telefono);
+
+    // Por seguridad, siempre retornamos el mismo mensaje
+    if (!user) {
+      return {
+        success: true,
+        message: 'Si el número está registrado, recibirás un código por WhatsApp',
+      };
+    }
+
+    // Generar código y fecha de expiración (10 minutos)
+    const codigo = this.generateRecoveryCode();
+    const expiracion = new Date();
+    expiracion.setMinutes(expiracion.getMinutes() + 10);
+
+    // Guardar código en la base de datos
+    await this.usersService.update(user.id, {
+      codigoRecuperacion: codigo,
+      codigoRecuperacionExpira: expiracion,
+    } as any);
+
+    // Enviar código por WhatsApp (llamada al service-pet)
+    try {
+      const petServiceUrl = this.configService.get<string>('PET_SERVICE_URL') || 'http://localhost:3001';
+      await axios.post(`${petServiceUrl}/whatsapp/send-recovery-code`, {
+        phone: dto.telefono,
+        nombreUsuario: user.nombre,
+        codigo: codigo,
+      });
+    } catch (error) {
+      console.error('Error enviando WhatsApp:', error.message);
+      // No lanzamos error para no revelar si el número existe
+    }
+
+    return {
+      success: true,
+      message: 'Si el número está registrado, recibirás un código por WhatsApp',
+    };
+  }
+
+  // Verificar código de WhatsApp
+  async verificarCodigoWhatsApp(dto: VerificarCodigoWhatsAppDto) {
+    const user = await this.usersService.findByPhone(dto.telefono);
+
+    if (!user) {
+      throw new BadRequestException('Código inválido o expirado');
+    }
+
+    // Verificar que el código coincida y no haya expirado
+    if (
+      user.codigoRecuperacion !== dto.codigo ||
+      !user.codigoRecuperacionExpira ||
+      new Date() > user.codigoRecuperacionExpira
+    ) {
+      throw new BadRequestException('Código inválido o expirado');
+    }
+
+    return {
+      success: true,
+      message: 'Código verificado correctamente',
+    };
+  }
+
+  // Resetear contraseña con código de WhatsApp
+  async resetContrasenaWhatsApp(dto: ResetContrasenaWhatsAppDto) {
+    const user = await this.usersService.findByPhone(dto.telefono);
+
+    if (!user) {
+      throw new BadRequestException('Código inválido o expirado');
+    }
+
+    // Verificar código nuevamente
+    if (
+      user.codigoRecuperacion !== dto.codigo ||
+      !user.codigoRecuperacionExpira ||
+      new Date() > user.codigoRecuperacionExpira
+    ) {
+      throw new BadRequestException('Código inválido o expirado');
+    }
+
+    // Actualizar contraseña y limpiar código
+    await this.usersService.update(user.id, {
+      contrasena: dto.nuevaContrasena,
+      codigoRecuperacion: null,
+      codigoRecuperacionExpira: null,
+    } as any);
+
+    return {
+      success: true,
+      message: 'Contraseña actualizada exitosamente',
+    };
   }
 
   async validateUser(userId: number) {

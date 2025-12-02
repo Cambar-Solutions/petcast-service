@@ -75,6 +75,16 @@ export class UsersService {
     });
   }
 
+  async findByPhone(telefono: string): Promise<Dueno | null> {
+    // Limpiar el número de teléfono (solo dígitos)
+    const cleanPhone = telefono.replace(/\D/g, '');
+
+    // Buscar en dueños (los únicos que tienen teléfono)
+    return this.duenoRepository.findOne({
+      where: { telefono: cleanPhone },
+    });
+  }
+
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
     Object.assign(user, updateUserDto);

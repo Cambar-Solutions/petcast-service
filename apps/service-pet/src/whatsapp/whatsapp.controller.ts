@@ -104,6 +104,22 @@ export class WhatsappController {
     );
   }
 
+  @Post('send-recovery-code')
+  async sendRecoveryCode(
+    @Body()
+    body: {
+      phone: string;
+      nombreUsuario: string;
+      codigo: string;
+    },
+  ) {
+    return await this.whatsappService.sendPasswordRecoveryCode(
+      body.phone,
+      body.nombreUsuario,
+      body.codigo,
+    );
+  }
+
   @Get('qr')
   getQRCode() {
     const qrCode = this.whatsappService.getQRCode();

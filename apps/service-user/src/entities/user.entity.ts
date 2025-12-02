@@ -48,6 +48,12 @@ export abstract class User {
   @Column({ type: 'datetime', nullable: true })
   ultimoAcceso: Date;
 
+  @Column({ length: 6, nullable: true })
+  codigoRecuperacion: string;
+
+  @Column({ type: 'datetime', nullable: true })
+  codigoRecuperacionExpira: Date;
+
   @BeforeInsert()
   @BeforeUpdate()
   async hashPassword() {

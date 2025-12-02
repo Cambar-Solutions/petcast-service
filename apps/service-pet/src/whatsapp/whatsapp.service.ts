@@ -289,6 +289,20 @@ export class WhatsappService implements OnModuleInit {
     return this.sendMessage(phone, message);
   }
 
+  // Enviar código de recuperación de contraseña
+  async sendPasswordRecoveryCode(
+    phone: string,
+    nombreUsuario: string,
+    codigo: string,
+  ) {
+    const message = whatsappTemplates.passwordRecoveryCode(
+      nombreUsuario,
+      codigo,
+    );
+
+    return this.sendMessage(phone, message);
+  }
+
   // Enviar recordatorio según tipo
   async sendReminderByType(
     phone: string,
