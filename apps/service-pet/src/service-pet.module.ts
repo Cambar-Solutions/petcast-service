@@ -5,6 +5,7 @@ import { ServicePetService } from './service-pet.service';
 import { PetsModule } from './pets/pets.module';
 import { MedicalRecordsModule } from './medical-records/medical-records.module';
 import { RemindersModule } from './reminders/reminders.module';
+import { WhatsappModule } from './whatsapp/whatsapp.module';
 import { DatabaseModule } from '@app/shared';
 
 @Module({
@@ -17,6 +18,7 @@ import { DatabaseModule } from '@app/shared';
     PetsModule,
     MedicalRecordsModule,
     RemindersModule,
+    WhatsappModule,
   ],
   controllers: [ServicePetController],
   providers: [ServicePetService],
