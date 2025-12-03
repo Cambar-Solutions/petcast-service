@@ -64,9 +64,7 @@ export class StatisticsService {
 
   async generateStatistics(dto: GenerateStatisticsDto): Promise<Estadistica> {
     const { periodo, fechaInicio, fechaFin } = dto;
-
     const dates = this.calculateDateRange(periodo, fechaInicio, fechaFin);
-
     const estadistica = this.estadisticaRepository.create({
       periodo,
       fechaInicio: dates.start,
@@ -75,7 +73,6 @@ export class StatisticsService {
       numeroClientes: 0,
       numeroMascotas: 0,
     });
-
     return this.estadisticaRepository.save(estadistica);
   }
 
@@ -87,11 +84,9 @@ export class StatisticsService {
     if (fechaInicio && fechaFin) {
       return { start: new Date(fechaInicio), end: new Date(fechaFin) };
     }
-
     const now = new Date();
     let start: Date;
     const end: Date = now;
-
     switch (periodo) {
       case TipoPeriodo.DIA:
         start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -109,7 +104,6 @@ export class StatisticsService {
       default:
         start = new Date(now.getFullYear(), now.getMonth(), 1);
     }
-
     return { start, end };
   }
 
@@ -193,6 +187,34 @@ export class StatisticsService {
         mascotasActivas: 0,
         mascotasInactivas: 0,
       };
+    }
+  }
+
+  async getCitasPorMes(): Promise<{ mes: string; citas: number }[]> {
+    try {
+      const result = await this.dataSource.query(
+        "SELECT DATE_FORMAT(fechaHora, '%Y-%m') as mesAnio, COUNT(*) as citas FROM citas WHERE fechaHora >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH) GROUP BY mesAnio ORDER BY mesAnio ASC"
+      );
+
+      const mesesNombres = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      const ahora = new Date();
+      const ultimos12Meses: { mes: string; citas: number }[] = [];
+
+      for (let i = 11; i >= 0; i--) {
+        const fecha = new Date(ahora.getFullYear(), ahora.getMonth() - i, 1);
+        const mesAnio = fecha.toISOString().slice(0, 7);
+        const mesNombre = mesesNombres[fecha.getMonth()];
+        const encontrado = result.find((r: any) => r.mesAnio === mesAnio);
+        ultimos12Meses.push({
+          mes: mesNombre,
+          citas: encontrado ? parseInt(encontrado.citas) : 0,
+        });
+      }
+
+      return ultimos12Meses;
+    } catch (error) {
+      console.error('Error fetching citas por mes:', error);
+      return [];
     }
   }
 }
