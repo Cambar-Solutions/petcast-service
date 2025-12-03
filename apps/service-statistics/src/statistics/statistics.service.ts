@@ -1,23 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between } from 'typeorm';
+import { Repository, Between, DataSource } from 'typeorm';
 import { CreateStatisticDto, GenerateStatisticsDto } from './dto/create-statistic.dto';
 import { UpdateStatisticDto } from './dto/update-statistic.dto';
 import { Estadistica } from '../entities/estadistica.entity';
 import { TipoPeriodo } from '@app/shared';
-
-// URLs de los microservicios internos
-const SERVICES = {
-  USER: process.env.SERVICE_USER_URL || 'http://localhost:4201',
-  PET: process.env.SERVICE_PET_URL || 'http://localhost:4202',
-  APPOINTMENT: process.env.SERVICE_APPOINTMENT_URL || 'http://localhost:4203',
-};
 
 @Injectable()
 export class StatisticsService {
   constructor(
     @InjectRepository(Estadistica)
     private readonly estadisticaRepository: Repository<Estadistica>,
+    private readonly dataSource: DataSource,
   ) {}
 
   async create(createStatisticDto: CreateStatisticDto): Promise<Estadistica> {
@@ -126,9 +120,6 @@ export class StatisticsService {
     });
   }
 
-  /**
-   * Obtiene estadisticas en tiempo real consultando los otros microservicios
-   */
   async getDashboardSummary(): Promise<{
     totalMascotas: number;
     totalCitas: number;
@@ -140,45 +131,51 @@ export class StatisticsService {
     mascotasInactivas: number;
   }> {
     try {
-      // Consultar todos los servicios en paralelo
-      const [mascotas, citas, usuarios] = await Promise.all([
-        this.fetchFromService(SERVICES.PET + '/api/pets'),
-        this.fetchFromService(SERVICES.APPOINTMENT + '/api/appointments'),
-        this.fetchFromService(SERVICES.USER + '/api/users'),
-      ]);
+      const mascotasResult = await this.dataSource.query(
+        'SELECT COUNT(*) as total FROM mascotas'
+      );
+      const totalMascotas = parseInt(mascotasResult[0]?.total || '0');
 
-      // Calcular estadisticas
-      const hoy = new Date();
-      hoy.setHours(0, 0, 0, 0);
+      const mascotasActivasResult = await this.dataSource.query(
+        "SELECT COUNT(*) as total FROM mascotas WHERE estado = 'ACTIVO' OR estado IS NULL"
+      );
+      const mascotasActivas = parseInt(mascotasActivasResult[0]?.total || '0');
 
-      const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+      const mascotasInactivasResult = await this.dataSource.query(
+        "SELECT COUNT(*) as total FROM mascotas WHERE estado = 'INACTIVO'"
+      );
+      const mascotasInactivas = parseInt(mascotasInactivasResult[0]?.total || '0');
 
-      // Filtrar citas de hoy
-      const citasHoy = Array.isArray(citas) ? citas.filter((c: any) => {
-        const fechaCita = new Date(c.fechaHora);
-        fechaCita.setHours(0, 0, 0, 0);
-        return fechaCita.getTime() === hoy.getTime();
-      }).length : 0;
+      const citasResult = await this.dataSource.query(
+        'SELECT COUNT(*) as total FROM citas'
+      );
+      const totalCitas = parseInt(citasResult[0]?.total || '0');
 
-      // Filtrar citas del mes
-      const citasMes = Array.isArray(citas) ? citas.filter((c: any) => {
-        const fechaCita = new Date(c.fechaHora);
-        return fechaCita >= inicioMes;
-      }).length : 0;
+      const citasHoyResult = await this.dataSource.query(
+        'SELECT COUNT(*) as total FROM citas WHERE DATE(fechaHora) = CURDATE()'
+      );
+      const citasHoy = parseInt(citasHoyResult[0]?.total || '0');
 
-      // Contar usuarios por rol
-      const clientes = Array.isArray(usuarios) ? usuarios.filter((u: any) => u.rol === 'DUENO').length : 0;
-      const veterinarios = Array.isArray(usuarios) ? usuarios.filter((u: any) => u.rol === 'VETERINARIO').length : 0;
+      const citasMesResult = await this.dataSource.query(
+        'SELECT COUNT(*) as total FROM citas WHERE MONTH(fechaHora) = MONTH(CURDATE()) AND YEAR(fechaHora) = YEAR(CURDATE())'
+      );
+      const citasMes = parseInt(citasMesResult[0]?.total || '0');
 
-      // Contar mascotas por estado
-      const mascotasActivas = Array.isArray(mascotas) ? mascotas.filter((m: any) => m.estado === 'ACTIVO' || !m.estado).length : 0;
-      const mascotasInactivas = Array.isArray(mascotas) ? mascotas.filter((m: any) => m.estado === 'INACTIVO').length : 0;
+      const clientesResult = await this.dataSource.query(
+        "SELECT COUNT(*) as total FROM users WHERE rol = 'DUENO'"
+      );
+      const totalClientes = parseInt(clientesResult[0]?.total || '0');
+
+      const veterinariosResult = await this.dataSource.query(
+        "SELECT COUNT(*) as total FROM users WHERE rol = 'VETERINARIO'"
+      );
+      const totalVeterinarios = parseInt(veterinariosResult[0]?.total || '0');
 
       return {
-        totalMascotas: Array.isArray(mascotas) ? mascotas.length : 0,
-        totalCitas: Array.isArray(citas) ? citas.length : 0,
-        totalClientes: clientes,
-        totalVeterinarios: veterinarios,
+        totalMascotas,
+        totalCitas,
+        totalClientes,
+        totalVeterinarios,
         citasHoy,
         citasMes,
         mascotasActivas,
@@ -186,7 +183,6 @@ export class StatisticsService {
       };
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
-      // Retornar valores por defecto en caso de error
       return {
         totalMascotas: 0,
         totalCitas: 0,
@@ -197,23 +193,6 @@ export class StatisticsService {
         mascotasActivas: 0,
         mascotasInactivas: 0,
       };
-    }
-  }
-
-  /**
-   * Helper para hacer fetch a los otros microservicios
-   */
-  private async fetchFromService(url: string): Promise<any[]> {
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        console.warn('Failed to fetch from ' + url + ': ' + response.status);
-        return [];
-      }
-      return await response.json();
-    } catch (error) {
-      console.warn('Error fetching from ' + url + ':', error);
-      return [];
     }
   }
 }
